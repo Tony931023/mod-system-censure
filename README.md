@@ -1,4 +1,4 @@
-﻿# System Censure - Module template
+﻿# System Censure 
 
 This is a module for [AzerothCore](http://www.azerothcore.org) that adds the function of a word censorship system for players.
 
