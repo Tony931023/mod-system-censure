@@ -17,7 +17,7 @@ You can download the module, unzip a folder and update it in the azerothcore/mod
 
 # Commands
 List of fully functional commands:
-* .chat chatcensure reload
+* .chat reload
   - Realod the chat Censure table.
 * .chatcensure add
   - Ban a word. Please use quotation marks when adding.
