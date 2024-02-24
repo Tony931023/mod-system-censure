@@ -33,7 +33,7 @@ public:
         }
     }
 
-    void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg) override
+    void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg) override
     {
         CheckMessage(player, msg, lang, nullptr, nullptr, nullptr, nullptr);
     }
