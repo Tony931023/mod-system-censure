@@ -1,5 +1,6 @@
 ﻿void AddSC_SystemCensure();
 
-void AddSystemCensureScripts() {
+void Addmod_system_censureScripts()
+{
     AddSC_SystemCensure();
 }
