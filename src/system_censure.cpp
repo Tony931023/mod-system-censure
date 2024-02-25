@@ -33,32 +33,32 @@ public:
         }
     }
 
-    void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg) override
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg) override
     {
-        CheckMessage(player, msg, lang, nullptr, nullptr, nullptr, nullptr);
+        CheckMessage(player, msg, nullptr, nullptr, nullptr, nullptr);
     }
 
-    void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Player* receiver) override
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Player* receiver) override
     {
-        CheckMessage(player, msg, lang, receiver, nullptr, nullptr, nullptr);
+        CheckMessage(player, msg, receiver, nullptr, nullptr, nullptr);
     }
 
-    void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Group* group) override
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Group* group) override
     {
-        CheckMessage(player, msg, lang, nullptr, group, nullptr, nullptr);
+        CheckMessage(player, msg, nullptr, group, nullptr, nullptr);
     }
 
-    void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Guild* guild) override
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Guild* guild) override
     {
-        CheckMessage(player, msg, lang, nullptr, nullptr, guild, nullptr);
+        CheckMessage(player, msg, nullptr, nullptr, guild, nullptr);
     }
 
-    void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Channel* channel) override
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Channel* channel) override
     {
-        CheckMessage(player, msg, lang, nullptr, nullptr, nullptr, channel);
+        CheckMessage(player, msg, nullptr, nullptr, nullptr, channel);
     }
 
-    void CheckMessage(Player* player, std::string& msg, uint32 lang, Player* /*receiver*/, Group* /*group*/, Guild* /*guild*/, Channel* channel)
+    void CheckMessage(Player* player, std::string& msg, Player* /*receiver*/, Group* /*group*/, Guild* /*guild*/, Channel* channel)
     {
         //if account is game master let them say what ever they like just incase they need to send the website
         if (player->GetSession()->GetSecurity() >= 1)
