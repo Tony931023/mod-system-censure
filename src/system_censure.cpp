@@ -35,30 +35,30 @@ public:
 
     void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg) override
     {
-        CheckMessage(player, msg, nullptr, nullptr, nullptr, nullptr);
+        CheckMessage(player, msg, nullptr, nullptr, nullptr);
     }
 
     void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Player* receiver) override
     {
-        CheckMessage(player, msg, receiver, nullptr, nullptr, nullptr);
+        CheckMessage(player, msg, receiver, nullptr, nullptr);
     }
 
     void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Group* group) override
     {
-        CheckMessage(player, msg, nullptr, group, nullptr, nullptr);
+        CheckMessage(player, msg, nullptr, group, nullptr);
     }
 
     void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Guild* guild) override
     {
-        CheckMessage(player, msg, nullptr, nullptr, guild, nullptr);
+        CheckMessage(player, msg, nullptr, nullptr, guild);
     }
 
-    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Channel* channel) override
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Channel* /*channel*/) override
     {
-        CheckMessage(player, msg, nullptr, nullptr, nullptr, channel);
+        CheckMessage(player, msg, nullptr, nullptr, nullptr);
     }
 
-    void CheckMessage(Player* player, std::string& msg, Player* /*receiver*/, Group* /*group*/, Guild* /*guild*/, Channel* channel)
+    void CheckMessage(Player* player, std::string& msg, Player* /*receiver*/, Group* /*group*/, Guild* /*guild*/)
     {
         //if account is game master let them say what ever they like just incase they need to send the website
         if (player->GetSession()->GetSecurity() >= 1)
@@ -73,7 +73,7 @@ public:
             if (lower.find(chat[i]) != std::string::npos)
             {
                 msg = "";
-                ChatHandler(player->GetSession()).PSendSysMessage("Palabra no permitida, Cuida tu vocabulario!");
+                ChatHandler(player->GetSession()).PSendSysMessage("Word not allowed, take care of your vocabulary!");
                 return;
             }
         }
@@ -159,7 +159,7 @@ public:
         }
         while (result->NextRow());
 
-        ChatHandler(me->GetSession()).PSendSysMessage("Recargado %u censuaras de chat en %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        ChatHandler(me->GetSession()).PSendSysMessage("Reloaded %u chat censorship in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         return true;
     }
 
@@ -171,7 +171,7 @@ public:
         {
             handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
-            ChatHandler(me->GetSession()).PSendSysMessage("Escriba la palabra a censurar");
+            ChatHandler(me->GetSession()).PSendSysMessage("Write the word to censor.");
             return false;
         }
 
@@ -182,12 +182,12 @@ public:
 
         if (result)
         {
-            ChatHandler(me->GetSession()).PSendSysMessage("Ya existe la palabra: |cff4CFF00 %s|r", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("The word already exists: |cff4CFF00 %s|r.", text.c_str());
         }
         else
         {
             CharacterDatabase.Query("INSERT INTO `chat_censure` (`text`) VALUES ('{}')", text.c_str());
-            ChatHandler(me->GetSession()).PSendSysMessage("Agregada: |cff4CFF00 %s|r a la censura de chat. Recarge la tabla para activarla", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("Added: |cff4CFF00 %s|r to chat censorship. Reload the table to activate it.", text.c_str());
         }
         return true;
     }
@@ -200,7 +200,7 @@ public:
         {
             handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
-            ChatHandler(me->GetSession()).PSendSysMessage("Escriba la palabra a borrar");
+            ChatHandler(me->GetSession()).PSendSysMessage("Write the word to delete.");
             return false;
         }
 
@@ -209,12 +209,12 @@ public:
 
         if (!result)
         {
-            ChatHandler(me->GetSession()).PSendSysMessage("No se encuentra la palabra : |cff4CFF00 %s|r en la base de datos", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("The word : |cff4CFF00 %s|r cannot be found in the database.", text.c_str());
         }
         else
         {
             CharacterDatabase.Query("DELETE FROM `chat_censure` WHERE `text` = '{}'", text.c_str());
-            ChatHandler(me->GetSession()).PSendSysMessage("Borrada: |cff4CFF00 %s|r Recarge la tabla para activarla", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("Cleared: |cff4CFF00 %s|r Reload the table to activate it.", text.c_str());
         }
         return true;
     }
