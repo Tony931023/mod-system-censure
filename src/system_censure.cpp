@@ -68,9 +68,9 @@ public:
         std::string lower = msg;
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-        for (int i = 0; i < chat.size(); ++i)
+        for (auto& i : chat)
         {
-            if (lower.find(chat[i]) != std::string::npos)
+            if (lower.find(i) != std::string::npos)
             {
                 msg = "";
                 ChatHandler(player->GetSession()).PSendSysMessage("Word not allowed, take care of your vocabulary!");
