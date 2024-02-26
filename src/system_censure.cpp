@@ -88,7 +88,7 @@ public:
     void OnLoadCustomDatabaseTable()
     {
         LOG_INFO("server.loading", "Loading Chat Censure...");
-        QueryResult result = CharacterDatabase.Query("SELECT `id`,`text` FROM `chat_censure`");
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure`");
 
         if (!result)
         {
@@ -103,8 +103,7 @@ public:
         do
         {
             Field* field = result->Fetch();
-            uint8 id = field[0].Get<uint8>();
-            chat.push_back(field[1].Get<std::string>());
+            chat.push_back(field[0].Get<std::string>());
             count++;
         }
         while (result->NextRow());
