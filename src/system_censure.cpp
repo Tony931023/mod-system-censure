@@ -145,15 +145,14 @@ public:
             return false;
 
         chat.clear();
-        QueryResult result = CharacterDatabase.Query("SELECT `id`,`text` FROM `chat_censure`");
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure`");
         uint32 count = 0;
         uint32 oldMSTime = getMSTime();
 
         do
         {
             Field* field = result->Fetch();
-            uint8 id = field[0].Get<uint8>();
-            chat.push_back(field[1].Get<std::string>());
+            chat.push_back(field[0].Get<std::string>());
             count++;
         }
         while (result->NextRow());
