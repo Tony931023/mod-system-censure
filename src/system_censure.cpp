@@ -7,12 +7,6 @@
 
 std::vector<std::string> chat;
 
-namespace
-{
-    bool _isEnableCC = false;
-    bool _isAnnounceCC = false;
-}
-
 class SystemCensure : public PlayerScript
 {
 public:
