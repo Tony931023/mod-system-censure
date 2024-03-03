@@ -7,77 +7,71 @@
 
 std::vector<std::string> chat;
 
-namespace 
-{ 
-	bool _isEnableCC 	= false; 
-	bool _isAnnounceCC	= false; 
-}
-
-
 class SystemCensure : public PlayerScript
 {
 public:
     SystemCensure() : PlayerScript("SystemCensure") {}
 
-    bool _isEnableCC	 = sConfigMgr->GetBoolDefault("ChatCensure.Enable", true);
-    bool _isAnnounceCC	 = sConfigMgr->GetBoolDefault("ChatCensure.Announce", true);
+    bool _isEnableCC = sConfigMgr->GetOption<bool>("ChatCensure.Enable", true);
+    bool _isAnnounceCC = sConfigMgr->GetOption<bool>("ChatCensure.Announce", true);
 
-	// Announce Module
-	void OnLogin(Player *player) override
-	{
-		if (_isEnableCC)
-		{
-			if (_isAnnounceCC)
-			{
-				ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Chat Censure |rmodule.");
-			}
-		}
-	}
-		
-			void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg) override
-			{
-				CheckMessage(player, msg, lang, NULL, NULL, NULL, NULL);
-			}
+    // Announce Module
+    void OnLogin(Player* player) override
+    {
+        if (_isEnableCC)
+        {
+            if (_isAnnounceCC)
+            {
+                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Chat Censure |rmodule.");
+            }
+        }
+    }
 
-			void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Player* receiver) override
-			{
-				CheckMessage(player, msg, lang, receiver, NULL, NULL, NULL);
-			}
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg) override
+    {
+        CheckMessage(player, msg, nullptr, nullptr, nullptr);
+    }
 
-			void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Group* group) override
-			{
-				CheckMessage(player, msg, lang, NULL, group, NULL, NULL);
-			}
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Player* receiver) override
+    {
+        CheckMessage(player, msg, receiver, nullptr, nullptr);
+    }
 
-			void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Guild* guild) override
-			{
-				CheckMessage(player, msg, lang, NULL, NULL, guild, NULL);
-			}
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Group* group) override
+    {
+        CheckMessage(player, msg, nullptr, group, nullptr);
+    }
 
-			void OnChat(Player* player, uint32 /*type*/, uint32 lang, std::string& msg, Channel* channel) override
-			{
-				CheckMessage(player, msg, lang, NULL, NULL, NULL, channel);
-			}
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Guild* guild) override
+    {
+        CheckMessage(player, msg, nullptr, nullptr, guild);
+    }
 
-			void CheckMessage(Player* player, std::string& msg, uint32 lang, Player* /*receiver*/, Group* /*group*/, Guild* /*guild*/, Channel* channel) 
-			{
-				//if account is game master let them say what ever they like just incase they need to send the website
-				if (player->GetSession()->GetSecurity() >= 1)
-					return;
+    void OnChat(Player* player, uint32 /*type*/, uint32 /*lang*/, std::string& msg, Channel* /*channel*/) override
+    {
+        CheckMessage(player, msg, nullptr, nullptr, nullptr);
+    }
 
-				// transform to lowercase (for simpler checking)
-				std::string lower = msg;
-				std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    void CheckMessage(Player* player, std::string& msg, Player* /*receiver*/, Group* /*group*/, Guild* /*guild*/)
+    {
+        //if account is game master let them say what ever they like just incase they need to send the website
+        if (player->GetSession()->GetSecurity() >= 1)
+            return;
 
-				for (int i = 0; i < chat.size(); ++i)
-				if (lower.find(chat[i]) != std::string::npos)
-				{
-					msg = "";
-					ChatHandler(player->GetSession()).PSendSysMessage("Palabra no permitida, Cuida tu vocabulario!");
-					return;
-				} 
-			}
-		
+        // transform to lowercase (for simpler checking)
+        std::string lower = msg;
+        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+        for (auto& i : chat)
+        {
+            if (lower.find(i) != std::string::npos)
+            {
+                msg = "";
+                ChatHandler(player->GetSession()).PSendSysMessage("Word not allowed, take care of your vocabulary!");
+                return;
+            }
+        }
+    }
 };
 
 class LoadChatTable : public WorldScript
@@ -87,33 +81,29 @@ public:
 
     void OnLoadCustomDatabaseTable()
     {
-	
-	    LOG_INFO("server.loading", "Loading Chat Censure...");
-
-        QueryResult result = CharacterDatabase.Query("SELECT `id`,`text` FROM chat_censure");
+        LOG_INFO("server.loading", "Loading Chat Censure...");
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure`");
 
         if (!result)
         {
             LOG_INFO("server.loading", ">> Loaded 0 Chat Censures. DB table `Chat_Censure` is empty!");
-			LOG_INFO("server.loading", " ");
+            LOG_INFO("server.loading", " ");
             return;
         }
 
         uint32 count = 0;
         uint32 oldMSTime = getMSTime();
-        
+
         do
         {
             Field* field = result->Fetch();
-            uint8 id = field[0].Get<uint8>();
-            chat.push_back(field[1].Get<std::string>());
-
+            chat.push_back(field[0].Get<std::string>());
             count++;
-
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
 
         LOG_INFO("server.loading", ">> Loaded {} chat_censure in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
-		LOG_INFO("server.loading", " ");
+        LOG_INFO("server.loading", " ");
     }
 };
 
@@ -122,27 +112,26 @@ using namespace Acore::ChatCommands;
 class ChatCensureCommand : public CommandScript
 {
 public:
-    
     ChatCensureCommand() : CommandScript("ChatCensureCommand") { }
-			
-	ChatCommandTable GetCommands() const override
-    {       
-        
+
+    ChatCommandTable GetCommands() const override
+    {
         static ChatCommandTable ChatCensureCommandTable =
         {
-            { "reload",      	HandleReloadCommand,      SEC_GAMEMASTER,    Console::No },
-            { "add",        	HandleAddCommand,         SEC_GAMEMASTER,    Console::No },
-            { "delete",       	HandleDeleteCommand,      SEC_GAMEMASTER,    Console::No },
-            
+            { "reload", HandleReloadCommand, SEC_GAMEMASTER, Console::No },
+            { "add", HandleAddCommand, SEC_GAMEMASTER, Console::No },
+            { "delete", HandleDeleteCommand, SEC_GAMEMASTER, Console::No },
         };
+
         static ChatCommandTable ChatCensurePBaseTable =
         {
             { "chatcensure", ChatCensureCommandTable }
         };
+
         return ChatCensurePBaseTable;
-    }	
-	
-    static bool HandleReloadCommand(ChatHandler* handler, char const* args)
+    }
+
+    static bool HandleReloadCommand(ChatHandler* handler)
     {
         Player* me = handler->GetSession()->GetPlayer();
 
@@ -150,83 +139,74 @@ public:
             return false;
 
         chat.clear();
-        QueryResult result = CharacterDatabase.Query("SELECT `id`,`text` FROM chat_censure");
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure`");
         uint32 count = 0;
         uint32 oldMSTime = getMSTime();
 
         do
         {
             Field* field = result->Fetch();
-            uint8 id = field[0].Get<uint8>();
-            chat.push_back(field[1].Get<std::string>());
-
+            chat.push_back(field[0].Get<std::string>());
             count++;
+        }
+        while (result->NextRow());
 
-        } while (result->NextRow());
-
-        ChatHandler(me->GetSession()).PSendSysMessage("Recargado %u censuaras de chat en %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        ChatHandler(me->GetSession()).PSendSysMessage("Reloaded %u chat censorship in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         return true;
-
     }
 
-    static bool HandleAddCommand(ChatHandler* handler, char const* args)
+    static bool HandleAddCommand(ChatHandler* handler, std::string args)
     {
         Player* me = handler->GetSession()->GetPlayer();
-		
-		if (!*args)
-        {	
-			handler->SendSysMessage(LANG_IMPROPER_VALUE);
+
+        if (!args.empty())
+        {
+            handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
-			ChatHandler(me->GetSession()).PSendSysMessage("Escriba la palabra a censurar");
+            ChatHandler(me->GetSession()).PSendSysMessage("Write the word to censor.");
             return false;
         }
 
-        std::string text = args;
-
         //lets check the Database to see if arguement already exist
-        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", text.c_str());
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", args);
 
         if (result)
         {
-            ChatHandler(me->GetSession()).PSendSysMessage("Ya existe la palabra: |cff4CFF00 %s|r", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("The word already exists: |cff4CFF00 %s|r.", args);
         }
         else
         {
-            CharacterDatabase.Query("INSERT INTO `chat_censure` (`text`) VALUES ('{}')", text.c_str());
-            ChatHandler(me->GetSession()).PSendSysMessage("Agregada: |cff4CFF00 %s|r a la censura de chat. Recarge la tabla para activarla", text.c_str());
+            CharacterDatabase.Query("INSERT INTO `chat_censure` (`text`) VALUES ('{}')", args);
+            ChatHandler(me->GetSession()).PSendSysMessage("Added: |cff4CFF00 %s|r to chat censorship. Reload the table to activate it.", args);
         }
         return true;
     }
 
-    static bool HandleDeleteCommand(ChatHandler* handler, char const* args)
+    static bool HandleDeleteCommand(ChatHandler* handler, std::string args)
     {
         Player* me = handler->GetSession()->GetPlayer();
 
-		if (!*args)
-        {	
-			handler->SendSysMessage(LANG_IMPROPER_VALUE);
+        if (!args.empty())
+        {
+            handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
-			ChatHandler(me->GetSession()).PSendSysMessage("Escriba la palabra a borrar");
+            ChatHandler(me->GetSession()).PSendSysMessage("Write the word to delete.");
             return false;
         }
 
-        std::string text = args;
-
-        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", text.c_str());
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", args);
 
         if (!result)
         {
-            ChatHandler(me->GetSession()).PSendSysMessage("No se encuentra la palabra : |cff4CFF00 %s|r en la base de datos", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("The word : |cff4CFF00 %s|r cannot be found in the database.", args);
         }
         else
         {
-            CharacterDatabase.Query("DELETE FROM `chat_censure` WHERE `text` = '{}'", text.c_str());
-            ChatHandler(me->GetSession()).PSendSysMessage("Borrada: |cff4CFF00 %s|r Recarge la tabla para activarla", text.c_str());
+            CharacterDatabase.Query("DELETE FROM `chat_censure` WHERE `text` = '{}'", args);
+            ChatHandler(me->GetSession()).PSendSysMessage("Cleared: |cff4CFF00 %s|r Reload the table to activate it.", args);
         }
-
         return true;
     }
-
 };
 
 void AddSC_SystemCensure()

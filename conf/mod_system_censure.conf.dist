@@ -22,4 +22,5 @@ ChatCensure.Enable = 1
 #        Default:     0 - Disabled
 #                     1 - Enabled
 #
+
 ChatCensure.Announce = 1
