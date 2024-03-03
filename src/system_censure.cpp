@@ -137,7 +137,7 @@ public:
         return ChatCensurePBaseTable;
     }
 
-    static bool HandleReloadCommand(ChatHandler* handler, char const* args)
+    static bool HandleReloadCommand(ChatHandler* handler)
     {
         Player* me = handler->GetSession()->GetPlayer();
 
@@ -162,11 +162,11 @@ public:
         return true;
     }
 
-    static bool HandleAddCommand(ChatHandler* handler, char const* args)
+    static bool HandleAddCommand(ChatHandler* handler, std::string args)
     {
         Player* me = handler->GetSession()->GetPlayer();
 
-        if (!*args)
+        if (!args.empty())
         {
             handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
@@ -174,28 +174,26 @@ public:
             return false;
         }
 
-        std::string text = args;
-
         //lets check the Database to see if arguement already exist
-        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", text.c_str());
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", args);
 
         if (result)
         {
-            ChatHandler(me->GetSession()).PSendSysMessage("The word already exists: |cff4CFF00 %s|r.", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("The word already exists: |cff4CFF00 %s|r.", args);
         }
         else
         {
-            CharacterDatabase.Query("INSERT INTO `chat_censure` (`text`) VALUES ('{}')", text.c_str());
-            ChatHandler(me->GetSession()).PSendSysMessage("Added: |cff4CFF00 %s|r to chat censorship. Reload the table to activate it.", text.c_str());
+            CharacterDatabase.Query("INSERT INTO `chat_censure` (`text`) VALUES ('{}')", args);
+            ChatHandler(me->GetSession()).PSendSysMessage("Added: |cff4CFF00 %s|r to chat censorship. Reload the table to activate it.", args);
         }
         return true;
     }
 
-    static bool HandleDeleteCommand(ChatHandler* handler, char const* args)
+    static bool HandleDeleteCommand(ChatHandler* handler, std::string args)
     {
         Player* me = handler->GetSession()->GetPlayer();
 
-        if (!*args)
+        if (!args.empty())
         {
             handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
@@ -203,17 +201,16 @@ public:
             return false;
         }
 
-        std::string text = args;
-        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", text.c_str());
+        QueryResult result = CharacterDatabase.Query("SELECT `text` FROM `chat_censure` WHERE `text` = '{}'", args);
 
         if (!result)
         {
-            ChatHandler(me->GetSession()).PSendSysMessage("The word : |cff4CFF00 %s|r cannot be found in the database.", text.c_str());
+            ChatHandler(me->GetSession()).PSendSysMessage("The word : |cff4CFF00 %s|r cannot be found in the database.", args);
         }
         else
         {
-            CharacterDatabase.Query("DELETE FROM `chat_censure` WHERE `text` = '{}'", text.c_str());
-            ChatHandler(me->GetSession()).PSendSysMessage("Cleared: |cff4CFF00 %s|r Reload the table to activate it.", text.c_str());
+            CharacterDatabase.Query("DELETE FROM `chat_censure` WHERE `text` = '{}'", args);
+            ChatHandler(me->GetSession()).PSendSysMessage("Cleared: |cff4CFF00 %s|r Reload the table to activate it.", args);
         }
         return true;
     }
